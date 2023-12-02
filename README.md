@@ -17,6 +17,8 @@ producer ---(fan out)--> parser --> analyse ---(fan in)--> reducer --> report
 
 ## How to run it
 
+### using docker
+
 ```
 git clone git@github.com:zztczcx/log-analyser.git 
 
@@ -26,8 +28,14 @@ docker build -t log-analyser .
 docker run -v ./testdata/:/app/testdata --name=log-analyser --rm log-analyser  -input="./testdata/http.log"
 ```
 
+### command line
+
+```
+go run main.go -input="./testdata/http.log"
+```
+
 ## Testing
 
 ```
-go test
+go test ./...
 ```
