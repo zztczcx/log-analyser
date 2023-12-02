@@ -51,7 +51,6 @@ func analyse(r <-chan Record, resultChan chan<- Result, wg *sync.WaitGroup){
 	}
 
         for record := range r {
-                log.Printf("record is %v\n", record.Url)
                 result.VisitedUrls[record.Url]++
                 result.ActiveIps[record.Ip]++
                 result.UniqIps[record.Ip] = true

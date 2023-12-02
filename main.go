@@ -18,6 +18,13 @@ const (
 func main() {
 	dataSource := producer("./programming-task-example-data.log")
         resultChan := make(chan httplog.Result)
+        startParser(dataSource, resultChan, parserCount)
+        finalResult := httplog.Reducer(resultChan)
+        report(stats.Statisticize(finalResult))
+
+}
+
+func startParser(dataSource <-chan string, resultChan chan<- httplog.Result, parserCount int) {
         var wg sync.WaitGroup
         wg.Add(parserCount)
 
@@ -29,10 +36,6 @@ func main() {
                 wg.Wait()
                 close(resultChan)
         }()
-
-        finalResult := httplog.Reducer(resultChan)
-        report(stats.Statisticize(finalResult))
-
 }
 
 
