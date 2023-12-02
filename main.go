@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"sync"
 
 	"log-analyser/httplog"
 	"log-analyser/stats"
@@ -17,10 +18,17 @@ const (
 func main() {
 	dataSource := producer("./programming-task-example-data.log")
         resultChan := make(chan httplog.Result)
+        var wg sync.WaitGroup
+        wg.Add(parserCount)
 
 	for i := 0; i < parserCount; i++ {
-		go httplog.Parser(dataSource, resultChan)
+		go httplog.Parser(dataSource, resultChan, &wg)
 	}
+
+        go func(){
+                wg.Wait()
+                close(resultChan)
+        }()
 
         finalResult := httplog.Reducer(resultChan)
         report(stats.Statisticize(finalResult))

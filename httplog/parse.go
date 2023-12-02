@@ -4,16 +4,17 @@ import (
 	"errors"
 	"log"
 	"regexp"
+	"sync"
 )
 
 const (
-        regexPattern = `^(\S+) \S+ \S+ \[.*\] "(GET|POST|PUT|DELETE|HEAD) (\S+) .*" \d+ \d+$`
+        regexPattern = `^(\d+\.\d+\.\d+\.\d+) .* "(GET|POST|PUT|DELETE) ([^"]+) HTTP.*" \d+ \d+ ".*" ".*"`
 
 )
 
-func Parser(dataSource <-chan string, resultChan chan<-  Result) {
+func Parser(dataSource <-chan string, resultChan chan<-  Result, wg *sync.WaitGroup) {
         analyseChan := make(chan Record)
-        go analyse(analyseChan, resultChan)
+        go analyse(analyseChan, resultChan, wg)
 
 	for d := range dataSource {
                 record, err := parseData(d)
@@ -40,9 +41,17 @@ func parseData(line string) (Record, error) {
 	}
 }
 
-func analyse(r <-chan Record, resultChan chan<- Result){
-        result := Result{}
+func analyse(r <-chan Record, resultChan chan<- Result, wg *sync.WaitGroup){
+        defer wg.Done()
+
+        result := Result{
+		VisitedUrls: make(map[string]int),
+		ActiveIps:   make(map[string]int),
+		UniqIps:     make(map[string]bool),
+	}
+
         for record := range r {
+                log.Printf("record is %v\n", record.Url)
                 result.VisitedUrls[record.Url]++
                 result.ActiveIps[record.Ip]++
                 result.UniqIps[record.Ip] = true
@@ -50,4 +59,3 @@ func analyse(r <-chan Record, resultChan chan<- Result){
 
         resultChan <- result
 }
-
