@@ -9,8 +9,8 @@ parse a file and make a statistic
 
 ## Design
 
-This program used a lot goroutines to speed up the processing which is good for processing a big log file.
-Basically we treat this process as mapReduce.
+It uses channel and goroutines to decouple each part of the processing and made a pipeline.
+we can treat this process as a MapReduce
 
 producer ---(fan out)--> parser --> analyse ---(fan in)--> reducer --> report
 
@@ -39,3 +39,8 @@ go run main.go -input="./testdata/http.log"
 ```
 go test ./...
 ```
+
+## TODO
+
+Currently the producer is reading file one by one, when the file is getting bigger, 
+we can try to use multiple gorountes to read the file.
