@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"log"
 	"os"
 	"sync"
@@ -16,10 +17,18 @@ const (
 )
 
 func main() {
-	dataSource := producer("./programming-task-example-data.log")
+        i := flag.String("input", "./testdata/http.log", "Source file")
+        flag.Parse()
+
+        if *i == "" {
+                panic("Missing log file")
+        }
+
+	dataSource := producer(*i)
         resultChan := make(chan httplog.Result)
         startParser(dataSource, resultChan, parserCount)
         finalResult := httplog.Reducer(resultChan)
+
         report(stats.Statisticize(finalResult))
 
 }
