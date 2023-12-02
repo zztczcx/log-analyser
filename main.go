@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -49,10 +50,9 @@ func startParser(dataSource <-chan string, resultChan chan<- httplog.Result, par
 
 
 func report(s stats.Statistic){
-
-        log.Printf("The number of unique IP addresses: %v\n", s.UnitIpNum)
-        log.Printf("The top 3 most visited URLs: %v\n", s.MostVisitedUrls)
-        log.Printf("The top 3 most active IP addresses: %v\n", s.MostActiveIps)
+        fmt.Printf("The number of unique IP addresses: %v\n", s.UnitIpNum)
+        fmt.Printf("The top 3 most visited URLs: %v\n", s.MostVisitedUrls)
+        fmt.Printf("The top 3 most active IP addresses: %v\n", s.MostActiveIps)
 }
 
 func producer(s string) <-chan string {
