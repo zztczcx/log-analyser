@@ -1,6 +1,6 @@
 package httplog
 
-func Reducer(resultChan <-chan Result) Result{
+func Reduce(resultChan <-chan Result) Result{
         finalResult := Result{
 		VisitedUrls: make(map[string]int),
 		ActiveIps:   make(map[string]int),

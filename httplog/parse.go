@@ -9,22 +9,37 @@ import (
 
 const (
         regexPattern = `^(\d+\.\d+\.\d+\.\d+) .* "(GET|POST|PUT|DELETE) ([^"]+) HTTP.*" \d+ \d+ ".*" ".*"`
+	parserCount = 5
 
 )
 
-func Parser(dataSource <-chan string, resultChan chan<-  Result, wg *sync.WaitGroup) {
-        analyseChan := make(chan Record)
-        go analyse(analyseChan, resultChan, wg)
+func startParser(dataSource <-chan string, resultChan chan<- Result) {
+	var wg sync.WaitGroup
+	wg.Add(parserCount)
+
+	for i := 0; i < parserCount; i++ {
+		go Parse(dataSource, resultChan, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+}
+
+func Parse(dataSource <-chan string, resultChan chan<-  Result, wg *sync.WaitGroup) {
+        collectChan := make(chan Record)
+        go collect(collectChan, resultChan, wg)
 
 	for d := range dataSource {
                 record, err := parseData(d)
                 if err != nil {
                         log.Println(err)
                 }else{
-                        analyseChan <- record
+                        collectChan <- record
                 }
 	}
-        close(analyseChan)
+        close(collectChan)
 }
 
 func parseData(line string) (Record, error) {
@@ -41,7 +56,7 @@ func parseData(line string) (Record, error) {
 	}
 }
 
-func analyse(r <-chan Record, resultChan chan<- Result, wg *sync.WaitGroup){
+func collect(r <-chan Record, resultChan chan<- Result, wg *sync.WaitGroup){
         defer wg.Done()
 
         result := Result{

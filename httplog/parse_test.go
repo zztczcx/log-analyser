@@ -19,7 +19,7 @@ func Test_parseData(t *testing.T) {
         }
 }
 
-func Test_analyse(t *testing.T) {
+func Test_collect(t *testing.T) {
         recordCh := make(chan Record)
         resultCh := make(chan Result)
         var wg sync.WaitGroup
@@ -31,21 +31,21 @@ func Test_analyse(t *testing.T) {
                 recordCh <- Record{Ip: "177.71.182.22", Url: "/def"}
                 close(recordCh)
         }()
-        go analyse(recordCh, resultCh, &wg)
+        go collect(recordCh, resultCh, &wg)
 
         r := <-resultCh
 
 
         if len(r.UniqIps) != 2 {
-                t.Errorf("analyse UniqIps failed")
+                t.Errorf("collect UniqIps failed")
         }
 
 
         if r.ActiveIps["177.71.182.21"] != 2 || r.ActiveIps["177.71.182.22"]  != 1{
-                 t.Errorf("analyse ActiveIps failed")
+                 t.Errorf("collect ActiveIps failed")
         }
 
         if r.VisitedUrls["/abc"] != 2 || r.VisitedUrls["/def"]  != 1{
-                 t.Errorf("analyse VisitedUrls failed")
+                 t.Errorf("collect VisitedUrls failed")
         }
 }
